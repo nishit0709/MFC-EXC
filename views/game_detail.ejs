@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <link rel="stylesheet" href="/stylesheets/game_detail.css">
+
+    <script>
+        async function logout(){
+            await fetch('/home',{
+            method: 'POST'
+            })
+        }
+
+        async function add(item,cost){
+            const addItem = {
+                item: item,
+                cost: cost,
+            }
+            console.log(addItem)
+            await fetch("/cart/add",{
+                method: "POST",
+                body: JSON.stringify(addItem),
+                headers:{
+                    'Content-type': 'application/json; charset=UTF-8'
+                }
+            })
+            .then(res => {return res.json()})
+            .then( data => {
+                if(data.msg == 'true'){
+                    alert("Item Added to cart successfully")
+                } else {
+                    alert("Kindly Login before adding items to cart")
+                }
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        }
+
+        function review(auth, gameID){
+            if(auth){
+                location.replace("/review/?id="+gameID)
+            } else {
+                alert("Kindly Login before writing a review")
+            }
+        }
+
+        async function purchae(item,cost){
+            const addItem = {
+                item: item,
+                cost: cost,
+            }
+            console.log(addItem)
+            await fetch("/cart/add",{
+                method: "POST",
+                body: JSON.stringify(addItem),
+                headers:{
+                    'Content-type': 'application/json; charset=UTF-8'
+                }
+            })
+            .then(res => {return res.json()})
+            .then( data => {
+                if(data.msg == 'true'){
+                    location.replace("/purchase")
+                } else {
+                    alert("Kindly Login before purchasing games")
+                }
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
+        }
+    </script>
+    <title>Game Details</title>
+</head>
+    <body class="bg-dark">
+        <header class="nav-bar">
+            <div class="container-fluid">
+               <nav class="navbar navbar-expand-sm bg-dark justify-content-between">
+                   <a class="navbar-brand"  href="/">
+                       <img src="/site_data/images/Gamekart-logos_white.png" alt="Logo" style="width: 200px; height: 50px;">
+                   </a>
+                   <ul class="navbar-nav">
+                    <% if(isLoggedIn) { %>
+                        <li class="nav-item" style="padding-right:20px">
+                          <a href="/cart">
+                            <img src="/site_data/images/bag.png" alt="Bag" id="bag">
+                          </a>
+                        </li>
+                    <% } %>
+                     <li class="nav-item">
+                       <div class="btn-group btn-group-lg" >
+                         <% if(isLoggedIn) { %>
+                            <a href="/home" onclick=logout() class="btn btn-primary" role="button">Logout</a>
+                         <% }else{ %>
+                           <a href="/login" class="btn btn-primary" role="button">Login</a>
+                           <a href="/signup" class="btn btn-primary" role="button">Signup</a>
+                         <% } %>
+                       </div>
+                     </li>
+                   </ul>
+               </nav>
+            </div>
+        </header> 
+        <div class="container-fluid">
+            <div class="row text-white">
+                <div class="col-3 border border-white text-center" id="abtGame">    
+                    <h2 style="font-weight:bold;font-size:50px;"><%= game.name %></h2>
+                    <p class="font-italic"><%= game.caption %></p><br><br><br>
+                    <p style="font-size:20px;"><%= game.description %></p><br><br></br>
+                    <p style="font-size: 25px;"> ₹<%= game.cost %> /-</p><br>
+                    <div class="btn-group btn-group-lg" style="padding-top: 40px;">
+                        <a role="button" class="btn btn-primary" onclick='purchae("<%= game.name %>","<%= game.cost %>")'>Buy Now</button>
+                        <a role="button" class="btn btn-primary" onclick='add("<%= game.name %>","<%= game.cost %>")' >Add to Cart</button>
+                        <a role="button" class="btn btn-primary" onclick="review('<%=isLoggedIn%>', '<%=game._id%>')" >Write a review</a>
+                    </div>
+                </div>
+                <div class="col-9 border border-white" >
+                    <div id="demo" class="carousel slide" data-ride="carousel">
+            
+                        <!-- Indicators -->
+                        
+                        <ul class="carousel-indicators">
+                            <li data-target="#demo" data-slide-to="0" class="active"></li>
+                            <% for(let i=1;i<=gameImage.length;i++){ %>
+                                <li data-target="#demo" data-slide-to="<%=i%>"></li>
+                            <%}%>
+                        </ul>
+                        
+                        <!-- The slideshow -->
+                        <div class="carousel-inner justify-content-center ">
+                            <div class="carousel-item active">
+                                <img src="<%= gamePoster %>" style="width:100%; height: 950px !important;" >
+                            </div>
+                            <% gameImage.forEach((image)=>{ %>
+                                <div class="carousel-item">
+                                    <img src="<%= image %>" style="width:100%; height: 950px !important;">
+                                </div>
+                            <%})%>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container text-white text-center">
+                <br><br>
+                <h1 style="font-weight: bolder; font-size: 60px;">Reviews</h1>
+                <div class="container d-inline text-white text-left" style="padding: 30%;" >
+                    <ul class="list-group">
+                        <% reviews.forEach((review)=>{ %>
+                            <li class="list-group-item bg-dark border border-white " style="height:fit-content; border-radius: 20px;">
+                                <h1><%= review.title %></h1>
+                                <p class="font-italic">By <%= review.userName  %></p><br><br>
+                                <p><%= review.review %></p>
+                            </li>
+                        <% } )%>    
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
